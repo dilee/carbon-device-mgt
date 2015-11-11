@@ -18,6 +18,8 @@
  */
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOException;
 import org.wso2.carbon.device.mgt.core.dao.DeviceManagementDAOFactory;
@@ -28,6 +30,8 @@ import java.sql.*;
 import java.util.Date;
 
 public class EnrolmentDAOImpl implements EnrolmentDAO {
+
+    private static Log log = LogFactory.getLog(AbstractDeviceDAOImpl.class);
 
     @Override
     public int addEnrollment(int deviceId, EnrolmentInfo enrolmentInfo,
@@ -40,7 +44,7 @@ public class EnrolmentDAOImpl implements EnrolmentDAO {
             conn = this.getConnection();
             String sql = "INSERT INTO DM_ENROLMENT(DEVICE_ID, OWNER, OWNERSHIP, STATUS, " +
                     "DATE_OF_ENROLMENT, DATE_OF_LAST_UPDATE, TENANT_ID) VALUES(?, ?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt = conn.prepareStatement(sql, new String[] {"id"});
             stmt.setInt(1, deviceId);
             stmt.setString(2, enrolmentInfo.getOwner());
             stmt.setString(3, enrolmentInfo.getOwnership().toString());
@@ -56,7 +60,9 @@ public class EnrolmentDAOImpl implements EnrolmentDAO {
             }
             return enrolmentId;
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while adding enrolment configuration", e);
+            String msg = "Error occurred while adding enrolment configuration";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -73,7 +79,7 @@ public class EnrolmentDAOImpl implements EnrolmentDAO {
             conn = this.getConnection();
             String sql = "UPDATE DM_ENROLMENT SET OWNERSHIP = ?, STATUS = ?, " +
                     "DATE_OF_ENROLMENT = ?, DATE_OF_LAST_UPDATE = ? WHERE DEVICE_ID = ? AND OWNER = ? AND TENANT_ID = ?";
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt = conn.prepareStatement(sql, new String[] {"id"});
             stmt.setString(1, enrolmentInfo.getOwnership().toString());
             stmt.setString(2, enrolmentInfo.getStatus().toString());
             stmt.setTimestamp(3, new Timestamp(enrolmentInfo.getDateOfEnrolment()));
@@ -105,7 +111,7 @@ public class EnrolmentDAOImpl implements EnrolmentDAO {
         try {
             conn = this.getConnection();
             String sql = "DELETE DM_ENROLMENT WHERE DEVICE_ID = ? AND OWNER = ? AND TENANT_ID = ?";
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt = conn.prepareStatement(sql, new String[] {"id"});
             stmt.setInt(1, deviceId);
             stmt.setString(2, currentOwner);
             stmt.setInt(3, tenantId);

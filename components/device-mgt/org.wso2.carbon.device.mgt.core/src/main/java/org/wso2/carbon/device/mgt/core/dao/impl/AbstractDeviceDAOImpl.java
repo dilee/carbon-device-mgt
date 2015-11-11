@@ -38,7 +38,6 @@ import java.util.List;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
-
     private static Log log = LogFactory.getLog(AbstractDeviceDAOImpl.class);
 
     @Override
@@ -67,10 +66,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
             return deviceId;
         } catch (SQLException e) {
-            log.error("Error occurred while enrolling device '" + device.getName() +
-                    "'", e);
-            throw new DeviceManagementDAOException("Error occurred while enrolling device '" + device.getName() +
-                    "'", e);
+            String msg = "Error occurred while enrolling device '" + device.getName() +
+                    "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -98,8 +97,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
             return status;
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while enrolling device '" +
-                    device.getName() + "'", e);
+            String msg = "Error occurred while enrolling device '" +
+                    device.getName() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -134,8 +135,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 device = DeviceManagementDAOUtil.loadDevice(rs);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while listing devices for type " +
-                    "'" + deviceIdentifier.getType() + "'", e);
+            String msg = "Error occurred while listing devices for type " +
+                    "'" + deviceIdentifier.getType() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -165,8 +168,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 deviceHashMap.put(rs.getInt("TENANT_ID"), device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while listing devices for type " +
-                    "'" + deviceIdentifier.getType() + "'", e);
+            String msg = "Error occurred while listing devices for type " +
+                    "'" + deviceIdentifier.getType() + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -196,8 +201,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 device = DeviceManagementDAOUtil.loadDevice(rs);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while retrieving device for id " +
-                                                   "'" + deviceId + "'", e);
+            String msg = "Error occurred while retrieving device for id " +
+                    "'" + deviceId + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -228,8 +235,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 devices.add(device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while retrieving information of all " +
-                    "registered devices", e);
+            String msg = "Error occurred while retrieving information of all " +
+                    "registered devices";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -261,7 +270,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 devices.add(device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while listing devices for type '" + type + "'", e);
+            String msg = "Error occurred while listing devices for type '" + type + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -292,8 +303,10 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 devices.add(device);
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while fetching the list of devices belongs to '" +
-                    username + "'", e);
+            String msg = "Error occurred while fetching the list of devices belongs to '" +
+                    username + "'";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, null);
         }
@@ -326,7 +339,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 deviceCount = rs.getInt("DEVICE_COUNT");
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while getting the device count", e);
+            String msg = "Error occurred while getting the device count";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -351,7 +366,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
                 deviceCount = rs.getInt("DEVICE_COUNT");
             }
         } catch (SQLException e) {
-            throw new DeviceManagementDAOException("Error occurred while getting the device count", e);
+            String msg = "Error occurred while getting the device count";
+            log.error(msg, e);
+            throw new DeviceManagementDAOException(msg, e);
         } finally {
             DeviceManagementDAOUtil.cleanupResources(stmt, rs);
         }
@@ -408,7 +425,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             conn = this.getConnection();
             String sql = "INSERT INTO DM_ENROLMENT(DEVICE_ID, OWNER, OWNERSHIP, STATUS,DATE_OF_ENROLMENT, " +
                     "DATE_OF_LAST_UPDATE, TENANT_ID) VALUES(?, ?, ?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt = conn.prepareStatement(sql, new String[] {"id"});
             stmt.setInt(1, device.getId());
             stmt.setString(2, device.getEnrolmentInfo().getOwner());
             stmt.setString(3, device.getEnrolmentInfo().getOwnership().toString());
