@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.device.mgt.core.dao.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.device.mgt.common.Device;
 import org.wso2.carbon.device.mgt.common.DeviceIdentifier;
 import org.wso2.carbon.device.mgt.common.EnrolmentInfo;
@@ -36,6 +38,9 @@ import java.util.List;
 
 public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
 
+
+    private static Log log = LogFactory.getLog(AbstractDeviceDAOImpl.class);
+
     @Override
     public int addDevice(int typeId, Device device, int tenantId) throws DeviceManagementDAOException {
         Connection conn;
@@ -46,7 +51,9 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             conn = this.getConnection();
             String sql = "INSERT INTO DM_DEVICE(DESCRIPTION, NAME, DEVICE_TYPE_ID, DEVICE_IDENTIFICATION, TENANT_ID) " +
                     "VALUES (?, ?, ?, ?, ?)";
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            stmt = conn.prepareStatement(sql, new String[] {"id"});
+
             stmt.setString(1, device.getDescription());
             stmt.setString(2, device.getName());
             stmt.setInt(3, typeId);
@@ -60,6 +67,8 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             }
             return deviceId;
         } catch (SQLException e) {
+            log.error("Error occurred while enrolling device '" + device.getName() +
+                    "'", e);
             throw new DeviceManagementDAOException("Error occurred while enrolling device '" + device.getName() +
                     "'", e);
         } finally {
@@ -77,7 +86,7 @@ public abstract class AbstractDeviceDAOImpl implements DeviceDAO {
             conn = this.getConnection();
             String sql = "UPDATE DM_DEVICE SET DESCRIPTION = ?, NAME = ? WHERE DEVICE_IDENTIFICATION = ? AND " +
                     "DEVICE_TYPE_ID = ? AND TENANT_ID = ?";
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt = conn.prepareStatement(sql, new String[] {"id"});
             stmt.setString(1, device.getDescription());
             stmt.setString(2, device.getName());
             stmt.setString(3, device.getDeviceIdentifier());
